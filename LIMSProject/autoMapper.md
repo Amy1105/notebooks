@@ -1,0 +1,1 @@
+测试一下foam的双向链接 [[MarkDown]]
