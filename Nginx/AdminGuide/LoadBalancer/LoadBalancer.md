@@ -94,7 +94,48 @@
 
 ## 与多个工作进程共享数据
 
+
 ### 设置区域大小
 
-## 使用DNS配置HTTP负载平衡
 
+## 使用DNS配置HTTP负载平衡--
+    可以在运行时使用DNS修改服务器组的配置
+    `http {
+        resolver 10.0.0.1 valid=300s ipv6=off;
+        resolver_timeout 10s;
+        server {
+            location / {
+                proxy_pass http://backend;
+            }
+        }
+        upstream backend {
+            zone backend 32k;
+            least_conn;
+            # ...
+            server backend1.example.com resolve;
+            server backend2.example.com resolve;
+        }
+    } `
+
+    服务器指令的resolve参数告诉NGINX Plus定期将backend1.example.com和backend2.example.com域名重新解析为IP地址。
+
+    解析器指令定义了NGINX Plus向其发送请求的DNS服务器的IP地址（此处为10.0.0.1）。默认情况下，NGINX Plus会按照记录中的生存时间（TTL）指定的频率重新解析DNS记录，但您可以使用有效参数覆盖TTL值；在该示例中为300秒或5分钟。
+
+    可选的ipv6=off参数意味着只有IPv4地址用于负载平衡，尽管默认情况下支持解析IPv4和ipv6地址。
+
+    如果域名解析为多个IP地址，则这些地址将保存到上游配置并进行负载平衡。在我们的示例中，服务器根据最小连接负载平衡方法进行负载平衡。如果服务器的IP地址列表发生了变化，NGINX Plus会立即开始跨新地址集进行负载平衡。
+
+## Microsoft Exchange服务器的负载平衡
+
+    在NGINX Plus Release 7及更高版本中，NGINX Plus可以将Microsoft Exchange流量代理到服务器或一组服务器，并对其进行负载平衡。
+
+* 要设置Microsoft Exchange服务器的负载平衡，请执行以下操作：
+    在位置块中，使用proxy_pass指令配置到上游Microsoft Exchange服务器组的代理：
+* 为了使Microsoft Exchange连接传递到上游服务器，在位置块中将proxy_http_version指令值设置为1.1，将proxy_set_header指令设置为Connection“”，就像保活连接一样：
+
+
+TCP和UDP负载平衡
+
+## 将NGINX配置为邮件代理服务器
+
+## 动态模块
